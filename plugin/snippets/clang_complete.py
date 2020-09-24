@@ -29,9 +29,17 @@ def snippetsTrigger():
 def snippetsReset():
   pass
 
+def utf8_position_from_byte_index(utf8_string, byte_index):
+  by = bytearray(utf8_string, 'utf-8', 'ignore')
+  return len(by[0:byte_index].decode('utf-8','ignore'))
+
+def byte_index_from_utf8_position(utf8_string, position):
+  return len(utf8_string[0:position].encode('utf-8','ignore'))
+
 def updateSnips():
   line = vim.current.line
-  row, col = vim.current.window.cursor
+  row, column_byte_index = vim.current.window.cursor
+  col = utf8_position_from_byte_index(line, column_byte_index)
 
   result = r.search(line, col)
   if result is None:
@@ -40,7 +48,9 @@ def updateSnips():
       vim.command('call feedkeys("\<c-i>", "n")')
       return
 
-  start, end = result.span()
+  startb, endb = result.span()
+  start = byte_index_from_utf8_position(result.string, startb)
+  end = byte_index_from_utf8_position(result.string, endb)
   vim.current.window.cursor = row, start
   isInclusive = vim.eval("&selection") == "inclusive"
   vim.command('call feedkeys("\<ESC>v%dl\<C-G>", "n")' % (end - start - isInclusive))
