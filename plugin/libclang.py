@@ -402,6 +402,7 @@ def formatResult(result):
   word = ""
   info = ""
   place_markers_for_optional_args = int(vim.eval("g:clang_complete_optional_args_in_snippets")) == 1
+  trailing_placeholder = int(vim.eval("g:clang_trailing_placeholder")) == 1
 
   def roll_out_optional(chunks):
     result = []
@@ -416,6 +417,7 @@ def formatResult(result):
 
     return [word] + result
 
+  argcount = 0
   for chunk in result.string:
 
     if chunk.isKindInformative():
@@ -434,10 +436,12 @@ def formatResult(result):
       for optional_arg in roll_out_optional(chunk.string):
         if place_markers_for_optional_args:
           word += snippetsFormatPlaceHolder(optional_arg)
+          argcount += 1
         info += optional_arg + "=?"
 
     if chunk.isKindPlaceHolder():
       word += snippetsFormatPlaceHolder(chunk_spelling)
+      argcount += 1
     else:
       word += chunk_spelling
 
@@ -447,6 +451,9 @@ def formatResult(result):
 
   if returnValue:
     menu = decode(returnValue.spelling) + " " + menu
+
+  if argcount > 0 and trailing_placeholder:
+    word += snippetsFormatPlaceHolder("_")
 
   completion['word'] = snippetsAddSnippet(info, word, abbr)
   completion['abbr'] = abbr
