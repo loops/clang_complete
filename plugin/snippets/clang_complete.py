@@ -53,6 +53,6 @@ def updateSnips():
   end = byte_index_from_utf8_position(result.string, endb)
   vim.current.window.cursor = row, start
   isInclusive = vim.eval("&selection") == "inclusive"
-  vim.command('call feedkeys("\<ESC>v%dl\<C-G>", "n")' % (end - start - isInclusive))
+  vim.command('call feedkeys("\<ESC>\<C-V>%dl\<C-G>", "n")' % (end - start - isInclusive))
 
 # vim: set ts=2 sts=2 sw=2 expandtab :
